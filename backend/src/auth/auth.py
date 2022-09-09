@@ -32,11 +32,17 @@ class AuthError(Exception):
 '''
 def get_token_auth_header(header):
     if 'Authorization' not in header:
-        abort(401)
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Authorization malformed.'
+        }, 401)
     headers = header['Authorization'].split(" ")
 
     if(len(headers) !=  2):
-        abort(403)
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Authorization malformed.'
+        }, 403)
     if(headers[0].lower() != 'bearer'):
         abort(403)
        
