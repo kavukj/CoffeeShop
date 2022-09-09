@@ -42,7 +42,7 @@ def drinks():
         })
     except SQLAlchemyError as e:
         print(e)
-
+        abort(500)
 
 '''
 @TODO implement endpoint
