@@ -1,6 +1,8 @@
+from operator import imod
 import os
 from flask import Flask, request, jsonify, abort
 from sqlalchemy import exc
+from sqlalchemy.exc import SQLAlchemyError
 import json
 from flask_cors import CORS
 
@@ -17,7 +19,7 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 '''
-# db_drop_and_create_all()
+#db_drop_and_create_all()
 
 # ROUTES
 '''
@@ -28,6 +30,18 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+
+@app.route("/drinks",methods=["GET"])
+def drinks():
+    try:      
+        drinks = Drink.query.all()
+        drink_format = [drink.short() for drink in drinks]
+        return jsonify({
+            'success':True,
+            'drinks':drink_format
+        })
+    except SQLAlchemyError as e:
+        print(e)
 
 
 '''
