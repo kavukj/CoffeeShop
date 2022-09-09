@@ -7,7 +7,7 @@ import json
 from flask_cors import CORS
 
 from .database.models import db_drop_and_create_all, setup_db, Drink
-from .auth.auth import AuthError, requires_auth
+from .auth.auth import AuthError, requires_auth, get_token_auth_header, check_permissions, verify_decode_jwt
 
 app = Flask(__name__)
 setup_db(app)
@@ -54,7 +54,11 @@ def drinks():
 '''
 @app.route("/drinks-detail",methods=["GET"])
 def drinksDetail():
+    header = request.headers
     try:      
+        jwt = get_token_auth_header(header)
+        payload = verify_decode_jwt(jwt)
+        check_permissions("get:drinks",payload)
         drinks = Drink.query.all()
         drink_format = [drink.long() for drink in drinks]
         return jsonify({
@@ -74,7 +78,6 @@ def drinksDetail():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
-
 
 '''
 @TODO implement endpoint

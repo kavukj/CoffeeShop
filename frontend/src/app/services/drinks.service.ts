@@ -92,11 +92,13 @@ export class DrinksService {
 
   getDrinks() {
     if (this.auth.can('get:drinks')) {
+      console.log(this.getHeaders())
       this.http.get(this.url + '/drinks-detail', this.getHeaders())
       .subscribe((res: any) => {
         this.drinksToItems(res.drinks);
       });
     } else {
+      console.log(this.getHeaders())
       this.http.get(this.url + '/drinks', this.getHeaders())
       .subscribe((res: any) => {
         this.drinksToItems(res.drinks);
