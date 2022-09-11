@@ -1,5 +1,5 @@
 import json
-from flask import request, _request_ctx_stack, abort
+from flask import request, _request_ctx_stack
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
@@ -45,7 +45,10 @@ def get_token_auth_header():
             'description': 'Authorization malformed.'
         }, 401)
     if(headers[0].lower() != 'bearer'):
-        abort(403)
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Authorization Invalid.'
+        }, 403)
        
     return headers[1]
     #raise Exception('Not Implemented')
@@ -63,9 +66,15 @@ def get_token_auth_header():
 '''
 def check_permissions(permission, payload):
     if 'permissions' not in payload:
-        abort(400)
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'No Permissions'
+        }, 400)
     if permission not in payload['permissions']:
-        abort(403)
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Unauthorized.'
+        }, 403)
 
 '''
 @TODO implement verify_decode_jwt(token) method
