@@ -54,12 +54,9 @@ def drinks():
         or appropriate status code indicating reason for failure
 '''
 @app.route("/drinks-detail",methods=["GET"])
-def drinksDetail():
-    header = request.headers
-    try:      
-        jwt = get_token_auth_header(header)
-        payload = verify_decode_jwt(jwt)
-        check_permissions("get:drinks",payload)
+@requires_auth("get:drinks")
+def drinksDetail(payload):
+    try:     
         drinks = Drink.query.all()
         drink_format = [drink.long() for drink in drinks]
         return jsonify({
@@ -80,13 +77,10 @@ def drinksDetail():
         or appropriate status code indicating reason for failure
 '''
 @app.route("/drinks",methods=["POST"])
-def add_drinks():
-    header = request.headers
+@requires_auth("post:drinks")
+def add_drinks(payload):
     body = request.get_json()
     try:
-        jwt = get_token_auth_header(header)
-        payload = verify_decode_jwt(jwt)
-        check_permissions("post:drinks",payload)
         title= body['title']
         recipe=body['recipe']
         #Checks if the recipe is an dict or not
@@ -115,21 +109,16 @@ def add_drinks():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
-@app.route("/drinks/<id>",methods=["PATCH"])
-def edit_drinks(id):
-    header = request.headers
+@app.route("/drinks/<int:id>",methods=["PATCH"])
+@requires_auth("patch:drinks")
+def edit_drinks(payload, id):
     body = request.get_json()
+    drink = Drink.query.filter(Drink.id == id).one_or_none()         
+    if not drink:
+        abort(404)
     try:
-        jwt = get_token_auth_header(header)
-        payload = verify_decode_jwt(jwt)
-        check_permissions("post:drinks",payload)
-        title= body['title']
         recipe=body['recipe'] #Type list
-        #Checks if the recipe is an dict or not
-        if isinstance(recipe, dict):
-            recipe = [recipe]  #Type list 
-        drink = Drink.query.filter(Drink.id == id).one_or_none()         
-        drink.title=title,
+        drink.title=body['title'],
         drink.recipe = json.dumps(recipe) #Type string  
         drink.update()
         drinks = Drink.query.all()

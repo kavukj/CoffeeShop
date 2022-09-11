@@ -30,7 +30,8 @@ class AuthError(Exception):
         it should raise an AuthError if the header is malformed
     return the token part of the header
 '''
-def get_token_auth_header(header):
+def get_token_auth_header():
+    header = request.headers
     if 'Authorization' not in header:
         raise AuthError({
             'code': 'invalid_header',

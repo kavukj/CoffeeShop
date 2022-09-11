@@ -113,6 +113,7 @@ export class DrinksService {
       .subscribe( (res: any) => {
         if (res.success) {
           this.drinksToItems(res.drinks);
+          console.log(res.drinks)
         }
       });
     } else { // insert
