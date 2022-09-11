@@ -131,7 +131,6 @@ def edit_drinks(payload, id):
         print(e)
         abort(500)
 
-
 '''
 @TODO implement endpoint
     DELETE /drinks/<id>
@@ -142,6 +141,25 @@ def edit_drinks(payload, id):
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
+
+@app.route("/drinks/<int:id>",methods=["DELETE"])
+@requires_auth("delete:drinks")
+def delete_drinks(payload, id):
+    drink = Drink.query.filter(Drink.id == id).one_or_none()         
+    if not drink:
+        abort(404)
+    try:
+        drink.delete()
+        drinks = Drink.query.all()
+        drink_format = [drink.long() for drink in drinks]
+        return jsonify({
+            'success':True,
+            'delete':id,
+            'drinks':drink_format
+        })
+    except SQLAlchemyError as e:
+        print(e)
+        abort(500)
 
 
 # Error Handling
