@@ -1,5 +1,6 @@
 from operator import imod
 import os
+import re
 from flask import Flask, request, jsonify, abort
 from sqlalchemy import exc
 from sqlalchemy.exc import SQLAlchemyError
@@ -78,6 +79,30 @@ def drinksDetail():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks",methods=["POST"])
+def add_drinks():
+    header = request.headers
+    body = request.get_json()
+    try:
+        jwt = get_token_auth_header(header)
+        payload = verify_decode_jwt(jwt)
+        check_permissions("post:drinks",payload)
+        title= body['title']
+        recipe=body['recipe']
+        #Checks if the recipe is an dict or not
+        if isinstance(recipe, dict):
+            recipe = [recipe]            
+        drink = Drink(title=title,recipe=json.dumps(recipe))   
+        drink.insert()
+        drinks = Drink.query.all()
+        drink_format = [drink.long() for drink in drinks]
+        return jsonify({
+            'success':True,
+            'drinks':drink_format
+        })
+    except SQLAlchemyError as e:
+        print(e)
+        abort(500)
 
 '''
 @TODO implement endpoint
@@ -90,6 +115,32 @@ def drinksDetail():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks/<id>",methods=["PATCH"])
+def edit_drinks(id):
+    header = request.headers
+    body = request.get_json()
+    try:
+        jwt = get_token_auth_header(header)
+        payload = verify_decode_jwt(jwt)
+        check_permissions("post:drinks",payload)
+        title= body['title']
+        recipe=body['recipe'] #Type list
+        #Checks if the recipe is an dict or not
+        if isinstance(recipe, dict):
+            recipe = [recipe]  #Type list 
+        drink = Drink.query.filter(Drink.id == id).one_or_none()         
+        drink.title=title,
+        drink.recipe = json.dumps(recipe) #Type string  
+        drink.update()
+        drinks = Drink.query.all()
+        drink_format = [drink.long() for drink in drinks]
+        return jsonify({
+            'success':True,
+            'drinks':drink_format
+        })
+    except SQLAlchemyError as e:
+        print(e)
+        abort(500)
 
 
 '''

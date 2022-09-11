@@ -42,7 +42,7 @@ def get_token_auth_header(header):
         raise AuthError({
             'code': 'invalid_header',
             'description': 'Authorization malformed.'
-        }, 403)
+        }, 401)
     if(headers[0].lower() != 'bearer'):
         abort(403)
        
