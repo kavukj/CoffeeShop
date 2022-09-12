@@ -2,10 +2,10 @@ import os
 from sqlalchemy import Column, String, Integer
 from flask_sqlalchemy import SQLAlchemy
 import json
+from ..settings import DB_NAME, DB_PASS, DB_USER
 
-database_filename = "database.db"
 project_dir = os.path.dirname(os.path.abspath(__file__))
-database_path = "sqlite:///{}".format(os.path.join(project_dir, database_filename))
+database_path = "postgresql://{}:{}@{}/{}".format(DB_USER,DB_PASS,"localhost:5432",DB_NAME)
 
 db = SQLAlchemy()
 
